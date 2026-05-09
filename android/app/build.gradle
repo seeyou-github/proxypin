@@ -1,5 +1,4 @@
 import java.util.Properties
-import java.io.FileInputStream
 import java.io.File
 
 plugins {
@@ -24,12 +23,6 @@ if (flutterVersionCode == null) {
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
-}
-
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -73,10 +66,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+            keyAlias 'Test'
+            keyPassword '123321'
+            storeFile rootProject.file('../TestKey.jks')
+            storePassword '123321'
         }
     }
 
