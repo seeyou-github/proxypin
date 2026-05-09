@@ -289,6 +289,9 @@
   "bottomNavigationSubtitle": "底部导航栏是否显示，重启后生效",
   "memoryCleanup": "内存清理",
   "memoryCleanupSubtitle": "到内存限制自动清理请求，清理后保留最近32条请求",
+  "autoBackupDirectory": "自动备份目录",
+  "autoBackupDirectoryPrompt": "请设置自动备份目录。收藏、代理域名白名单和代理域名黑名单将自动备份。",
+  "notSet": "未设置",
   "unlimited": "无限制",
   "custom": "自定义",
 

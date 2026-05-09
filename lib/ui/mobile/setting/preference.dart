@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_toastr/flutter_toastr.dart';
 import 'package:proxypin/l10n/app_localizations.dart';
 import 'package:proxypin/network/bin/configuration.dart';
 import 'package:proxypin/network/bin/server.dart';
 import 'package:proxypin/network/util/logger.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/ui/component/widgets.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/mobile/setting/theme.dart';
@@ -26,6 +29,8 @@ class _PreferenceState extends State<Preference> {
   late ProxyServer proxyServer;
   late Configuration configuration;
   late AppConfiguration appConfiguration;
+
+  AppLocalizations get localizations => AppLocalizations.of(context)!;
 
   final memoryCleanupController = TextEditingController();
   final memoryCleanupList = [null, 512, 1024, 2048, 4096];
@@ -147,10 +152,34 @@ class _PreferenceState extends State<Preference> {
                   title: Text(localizations.memoryCleanup),
                   subtitle: Text(localizations.memoryCleanupSubtitle, style: const TextStyle(fontSize: 12)),
                   trailing: memoryCleanup(context, localizations)),
+              Divider(height: 0, thickness: 0.3, color: dividerColor),
+              ListTile(
+                  title: Text(localizations.autoBackupDirectory),
+                  subtitle: Text(appConfiguration.autoBackupDirectory ?? localizations.notSet,
+                      overflow: TextOverflow.ellipsis),
+                  trailing: const Icon(Icons.folder_open_outlined),
+                  onTap: selectAutoBackupDirectory),
             ]),
             const SizedBox(height: 15),
           ],
         ));
+  }
+
+  Future<void> selectAutoBackupDirectory() async {
+    String? path = await FilePicker.platform.getDirectoryPath();
+    if (path == null) {
+      return;
+    }
+
+    setState(() {
+      appConfiguration.autoBackupDirectory = path;
+      appConfiguration.autoBackupPrompted = true;
+    });
+    await appConfiguration.flushConfig();
+    await AutoBackup.backupAll();
+    if (mounted) {
+      FlutterToastr.show(localizations.success, context);
+    }
   }
 
   Widget themeColor(BuildContext context) {

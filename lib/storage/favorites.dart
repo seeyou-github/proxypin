@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/websocket.dart';
 import 'package:proxypin/network/util/logger.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/storage/path.dart';
 import 'package:proxypin/utils/har.dart';
 
@@ -88,7 +89,9 @@ class FavoriteStorage {
   //刷新配置
   static Future<void> flushConfig() async {
     var list = await favorites;
-    await Paths.getPath("favorites.json").then((file) => file.writeAsString(toJson(list)));
+    final json = toJson(list);
+    await Paths.getPath("favorites.json").then((file) => file.writeAsString(json));
+    await AutoBackup.backupAll(favoritesJson: json);
   }
 
   static String toJson(Queue<Favorite> list) {

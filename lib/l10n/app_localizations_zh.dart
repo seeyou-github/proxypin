@@ -840,6 +840,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get memoryCleanupSubtitle => '到内存限制自动清理请求，清理后保留最近32条请求';
 
   @override
+  String get autoBackupDirectory => '自动备份目录';
+
+  @override
+  String get autoBackupDirectoryPrompt => '请设置自动备份目录。收藏、代理域名白名单和代理域名黑名单将自动备份。';
+
+  @override
+  String get notSet => '未设置';
+
+  @override
   String get unlimited => '无限制';
 
   @override
@@ -1926,6 +1935,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get memoryCleanupSubtitle => '到記憶體限制自動清理請求，清理後保留最近32條請求';
+
+  @override
+  String get autoBackupDirectory => '自動備份目錄';
+
+  @override
+  String get autoBackupDirectoryPrompt => '請設定自動備份目錄。收藏、代理網域白名單和代理網域黑名單將自動備份。';
+
+  @override
+  String get notSet => '未設定';
 
   @override
   String get unlimited => '無限制';

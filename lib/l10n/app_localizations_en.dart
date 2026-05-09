@@ -850,6 +850,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically clean up requests on memory limit reached and keep 32 most recent after cleaning';
 
   @override
+  String get autoBackupDirectory => 'Auto backup directory';
+
+  @override
+  String get autoBackupDirectoryPrompt =>
+      'Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
   String get unlimited => 'Unlimited';
 
   @override

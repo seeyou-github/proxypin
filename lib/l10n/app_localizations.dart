@@ -1728,6 +1728,24 @@ abstract class AppLocalizations {
   /// **'Automatically clean up requests on memory limit reached and keep 32 most recent after cleaning'**
   String get memoryCleanupSubtitle;
 
+  /// No description provided for @autoBackupDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto backup directory'**
+  String get autoBackupDirectory;
+
+  /// No description provided for @autoBackupDirectoryPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.'**
+  String get autoBackupDirectoryPrompt;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
   /// No description provided for @unlimited.
   ///
   /// In en, this message translates to:

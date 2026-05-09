@@ -22,6 +22,7 @@ import 'package:proxypin/network/util/file_read.dart';
 import 'package:proxypin/network/components/host_filter.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/network/util/system_proxy.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/utils/platform.dart';
 
 class Configuration {
@@ -120,7 +121,8 @@ class Configuration {
     HostFilter.blacklist.toJson();
     var json = jsonEncode(toJson());
     logger.d('Refresh configuration file $runtimeType ${toJson()}');
-    file.writeAsString(json);
+    await file.writeAsString(json);
+    await AutoBackup.backupAll();
   }
 
   /// 加载配置文件

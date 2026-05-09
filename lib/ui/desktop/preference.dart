@@ -15,9 +15,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_toastr/flutter_toastr.dart';
 import 'package:proxypin/l10n/app_localizations.dart';
 import 'package:proxypin/network/bin/configuration.dart';
 import 'package:proxypin/network/util/logger.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/ui/component/widgets.dart';
 import 'package:proxypin/ui/configuration.dart';
 
@@ -36,6 +39,8 @@ class Preference extends StatefulWidget {
 class _PreferenceState extends State<Preference> {
   late Configuration configuration;
   late AppConfiguration appConfiguration;
+
+  AppLocalizations get localizations => AppLocalizations.of(context)!;
 
   final memoryCleanupController = TextEditingController();
   final memoryCleanupList = [null, 512, 1024, 2048, 4096];
@@ -160,9 +165,33 @@ class _PreferenceState extends State<Preference> {
                   title: Text(localizations.memoryCleanup, style: titleStyle),
                   subtitle: Text(localizations.memoryCleanupSubtitle, style: subtitleStyle),
                   trailing: memoryCleanup(context, localizations)),
+              ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(localizations.autoBackupDirectory, style: titleStyle),
+                  subtitle: Text(appConfiguration.autoBackupDirectory ?? localizations.notSet,
+                      style: subtitleStyle, overflow: TextOverflow.ellipsis),
+                  trailing: const Icon(Icons.folder_open_outlined, size: 20),
+                  onTap: selectAutoBackupDirectory),
 
               SizedBox(height: 5),
             ])));
+  }
+
+  Future<void> selectAutoBackupDirectory() async {
+    String? path = await FilePicker.platform.getDirectoryPath();
+    if (path == null) {
+      return;
+    }
+
+    setState(() {
+      appConfiguration.autoBackupDirectory = path;
+      appConfiguration.autoBackupPrompted = true;
+    });
+    await appConfiguration.flushConfig();
+    await AutoBackup.backupAll();
+    if (mounted) {
+      FlutterToastr.show(localizations.success, context);
+    }
   }
 
   ///主题颜色

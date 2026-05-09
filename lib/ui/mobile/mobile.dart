@@ -52,7 +52,6 @@ import 'package:proxypin/utils/lang.dart';
 import 'package:proxypin/utils/listenable_list.dart';
 import 'package:proxypin/utils/navigator.dart';
 
-import '../app_update/app_update_repository.dart';
 import 'package:proxypin/ui/component/multi_window.dart';
 import 'package:proxypin/ui/mobile/debug/breakpoint_executor.dart';
 
@@ -124,14 +123,6 @@ class MobileHomeState extends State<MobileHomePage> implements EventListener, Li
     proxyServer.addListener(this);
     proxyServer.start();
     _remoteHistorySubscription = HistoryStorage.onRemoteImported.listen((item) => _openHistoryPage(item));
-
-    if (widget.appConfiguration.upgradeNoticeV27) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showUpgradeNotice();
-      });
-    } else if (Platform.isAndroid) {
-      AppUpdateRepository.checkUpdate(context);
-    }
 
     // Handle breakpoint window on mobile
     MultiWindow.onOpenWindow = (widgetName, args) async {
@@ -326,55 +317,6 @@ class MobileHomeState extends State<MobileHomePage> implements EventListener, Li
         SocketLaunch.startStatus.value = ValueWrap.of(value);
       });
     }
-  }
-
-  void showUpgradeNotice() {
-    bool isCN = Localizations.localeOf(context) == const Locale.fromSubtags(languageCode: 'zh');
-
-    String content = isCN
-        ? '提示：默认不会开启HTTPS抓包，请安装证书后再开启HTTPS抓包。\n\n'
-            '1. 新增html、css、js格式化以及代码高亮；\n'
-            '2. 高级重发支持指定时间；\n'
-            '3. 域名列表增加导出har文件；\n'
-            '4. 远程设备增加快速分享；\n'
-            '5. 收藏支持websocket消息持久化；\n'
-            '6. 远程脚本加载添加引导；\n'
-            '7. 优化消息体大文本展示；\n'
-            '8. 修复自定已读状态丢失问题；\n'
-        : 'Note: HTTPS capture is disabled by default — please install the certificate before enabling HTTPS capture.\n\n'
-            '1. Added HTML, CSS, and JS formatting with code highlighting;\n'
-            '2. Advanced repeat now supports specifying the time;\n'
-            '3. Added HAR file export for domain list;\n'
-            '4. Added quick share for remote devices;\n'
-            '5. Favorites support WebSocket message persistence;\n'
-            '6. Added guidance for remote script loading;\n'
-            '7. Optimized large text display in message body;\n'
-            '8. Fixed issue where custom read status was lost;\n';
-    showAlertDialog(isCN ? '更新内容V${AppConfiguration.version}' : "What's new in V${AppConfiguration.version}", content,
-        () {
-      widget.appConfiguration.upgradeNoticeV27 = false;
-      widget.appConfiguration.flushConfig();
-    });
-  }
-
-  void showAlertDialog(String title, String content, Function onClose) {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-              scrollable: true,
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      onClose.call();
-                      Navigator.pop(context);
-                    },
-                    child: Text(localizations.close))
-              ],
-              title: Text(title, style: const TextStyle(fontSize: 18)),
-              content: SelectableText(content));
-        });
   }
 }
 

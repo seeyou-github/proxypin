@@ -288,6 +288,9 @@
   "bottomNavigationSubtitle": "Bottom navigation bar is displayed, effective after restart",
   "memoryCleanup": "Memory Cleanup",
   "memoryCleanupSubtitle": "Automatically clean up requests on memory limit reached and keep 32 most recent after cleaning",
+  "autoBackupDirectory": "Auto backup directory",
+  "autoBackupDirectoryPrompt": "Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.",
+  "notSet": "Not set",
   "unlimited": "Unlimited",
   "custom": "Custom",
 
