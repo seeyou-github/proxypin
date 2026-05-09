@@ -186,8 +186,9 @@ class ProxyVpnService : VpnService(), ProtectSocket {
             proxyPassDomains
         )
         if (vpnInterface == null) {
+            val vpnServiceAction = "${applicationContext.packageName}.ProxyVpnService"
             val alertDialog = Intent(applicationContext, VpnAlertDialog::class.java)
-                .setAction("com.network.proxy.ProxyVpnService")
+                .setAction(vpnServiceAction)
             alertDialog.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(alertDialog)
             return

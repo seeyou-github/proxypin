@@ -25,6 +25,11 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def androidApplicationId = (project.findProperty('androidApplicationId') ?: 'com.network.proxy').toString().trim()
+if (!androidApplicationId.matches(/[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+/)) {
+    throw new GradleException("Invalid androidApplicationId: '${androidApplicationId}'")
+}
+
 android {
     namespace "com.network.proxy"
     compileSdk flutter.compileSdkVersion
@@ -54,7 +59,10 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.network.proxy"
+        applicationId androidApplicationId
+        manifestPlaceholders = [
+                vpnServiceAction: "${androidApplicationId}.ProxyVpnService"
+        ]
         ndk { abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64' }
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion

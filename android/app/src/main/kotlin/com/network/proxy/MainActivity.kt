@@ -50,8 +50,9 @@ class MainActivity : FlutterActivity() {
                 return
             }
 
+            val vpnServiceAction = "${applicationContext.packageName}.ProxyVpnService"
             val alertDialog = Intent(applicationContext, VpnAlertDialog::class.java)
-                .setAction("com.network.proxy.ProxyVpnService")
+                .setAction(vpnServiceAction)
             alertDialog.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(alertDialog)
             return
