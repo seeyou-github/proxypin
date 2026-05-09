@@ -3,6 +3,7 @@ package com.network.proxy
 import android.content.Intent
 import android.content.res.Configuration
 import com.network.proxy.plugin.AppLifecyclePlugin
+import com.network.proxy.plugin.AutoBackupStoragePlugin
 import com.network.proxy.plugin.InstalledAppsPlugin
 import com.network.proxy.plugin.PictureInPicturePlugin
 import com.network.proxy.plugin.ProcessInfoPlugin
@@ -13,6 +14,7 @@ import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity : FlutterActivity() {
     private val lifecycleChannel: AppLifecyclePlugin = AppLifecyclePlugin()
+    private val autoBackupStoragePlugin: AutoBackupStoragePlugin = AutoBackupStoragePlugin()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -41,9 +43,14 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(lifecycleChannel)
         flutterEngine.plugins.add(InstalledAppsPlugin())
         flutterEngine.plugins.add(ProcessInfoPlugin())
+        flutterEngine.plugins.add(autoBackupStoragePlugin)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (autoBackupStoragePlugin.handleActivityResult(requestCode, resultCode, data)) {
+            return
+        }
+
         if (requestCode == VpnServicePlugin.REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 activity.startService(ProxyVpnService.startVpnIntent(activity))

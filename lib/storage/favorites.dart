@@ -21,6 +21,7 @@ import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/websocket.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/storage/auto_backup.dart';
+import 'package:proxypin/storage/auto_backup_log.dart';
 import 'package:proxypin/storage/path.dart';
 import 'package:proxypin/utils/har.dart';
 
@@ -90,8 +91,18 @@ class FavoriteStorage {
   static Future<void> flushConfig() async {
     var list = await favorites;
     final json = toJson(list);
-    await Paths.getPath("favorites.json").then((file) => file.writeAsString(json));
-    await AutoBackup.backupAll(favoritesJson: json);
+    final file = await Paths.getPath("favorites.json");
+    await AutoBackupLog.info('Favorites config write started', {
+      'path': file.path,
+      'favoriteCount': list.length,
+      'bytes': json.length,
+    });
+    await file.writeAsString(json);
+    await AutoBackupLog.info('Favorites config write finished', {
+      'path': file.path,
+      'favoriteCount': list.length,
+    });
+    await AutoBackup.backupAll(favoritesJson: json, reason: 'favorites-flush');
   }
 
   static String toJson(Queue<Favorite> list) {

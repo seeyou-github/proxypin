@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_toastr/flutter_toastr.dart';
 import 'package:proxypin/l10n/app_localizations.dart';
+import 'package:proxypin/native/auto_backup_storage.dart';
 import 'package:proxypin/network/bin/configuration.dart';
 import 'package:proxypin/network/bin/server.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/storage/auto_backup.dart';
+import 'package:proxypin/storage/auto_backup_log.dart';
 import 'package:proxypin/ui/component/widgets.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/mobile/setting/theme.dart';
@@ -166,17 +168,34 @@ class _PreferenceState extends State<Preference> {
   }
 
   Future<void> selectAutoBackupDirectory() async {
-    String? path = await FilePicker.platform.getDirectoryPath();
+    await AutoBackupLog.info('Mobile auto backup directory selection started', {
+      'isAndroid': Platform.isAndroid,
+    });
+    String? path = Platform.isAndroid
+        ? await AutoBackupStorage.selectDirectory()
+        : await FilePicker.platform.getDirectoryPath();
     if (path == null) {
+      await AutoBackupLog.warn('Mobile auto backup directory selection cancelled', {
+        'isAndroid': Platform.isAndroid,
+      });
       return;
     }
 
+    await AutoBackupLog.info('Mobile auto backup directory selected', {
+      'isAndroid': Platform.isAndroid,
+      'path': path,
+    });
     setState(() {
       appConfiguration.autoBackupDirectory = path;
       appConfiguration.autoBackupPrompted = true;
     });
     await appConfiguration.flushConfig();
-    final backupSuccess = await AutoBackup.backupAll();
+    await AutoBackupLog.info('Mobile auto backup directory saved to config', {'path': path});
+    final backupSuccess = await AutoBackup.backupAll(reason: 'mobile-directory-selected');
+    await AutoBackupLog.info('Mobile auto backup directory validation finished', {
+      'path': path,
+      'success': backupSuccess,
+    });
     if (mounted) {
       if (backupSuccess) {
         FlutterToastr.show(localizations.success, context);
