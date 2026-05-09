@@ -20,15 +20,17 @@ if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
 def androidApplicationId = (project.findProperty('androidApplicationId') ?: 'com.network.proxy').toString().trim()
 if (!androidApplicationId.matches(/[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+/)) {
     throw new GradleException("Invalid androidApplicationId: '${androidApplicationId}'")
 }
+
+def androidAppName = (project.findProperty('androidAppName') ?: 'ProxyPin').toString().trim()
+if (androidAppName.isEmpty()) {
+    androidAppName = 'ProxyPin'
+}
+
+def flutterVersionName = (project.findProperty('flutterVersionName') ?: localProperties.getProperty('flutter.versionName') ?: '1.0').toString().trim()
 
 android {
     namespace "com.network.proxy"
@@ -61,6 +63,7 @@ android {
     defaultConfig {
         applicationId androidApplicationId
         manifestPlaceholders += [
+                appLabel: androidAppName,
                 vpnServiceAction: "${androidApplicationId}.ProxyVpnService"
         ]
         ndk { abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64' }

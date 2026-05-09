@@ -7,6 +7,14 @@ on:
         description: Android applicationId to build with
         required: false
         default: com.network.proxy
+      application_name:
+        description: Android app name to display on launcher
+        required: false
+        default: ProxyPin
+      version_name:
+        description: Android version name to build with
+        required: false
+        default: 1.0
 
 jobs:
   build:
@@ -45,6 +53,24 @@ jobs:
           fi
           echo "application_id=$app_id" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve Android app name
+        id: appname
+        run: |
+          app_name="${{ inputs.application_name }}"
+          if [ -z "$app_name" ]; then
+            app_name="ProxyPin"
+          fi
+          echo "application_name=$app_name" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve Android version name
+        id: versionname
+        run: |
+          version_name="${{ inputs.version_name }}"
+          if [ -z "$version_name" ]; then
+            version_name="1.0"
+          fi
+          echo "version_name=$version_name" >> "$GITHUB_OUTPUT"
+
       - name: Check signing keystore
         run: test -f TestKey.jks
 
@@ -58,6 +84,8 @@ jobs:
       - name: Build Android arm64 APK
         env:
           ORG_GRADLE_PROJECT_androidApplicationId: ${{ steps.appid.outputs.application_id }}
+          ORG_GRADLE_PROJECT_androidAppName: ${{ steps.appname.outputs.application_name }}
+          ORG_GRADLE_PROJECT_flutterVersionName: ${{ steps.versionname.outputs.version_name }}
         run: flutter build apk --release --target-platform android-arm64
 
       - name: Collect arm-v8a APK
