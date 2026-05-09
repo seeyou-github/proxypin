@@ -151,6 +151,11 @@ class _DomainFilterState extends State<DomainFilter> {
           TextButton.icon(icon: const Icon(Icons.add, size: 18), onPressed: add, label: Text(localizations.add)),
           const SizedBox(width: 5),
           TextButton.icon(
+              icon: const Icon(Icons.output_rounded, size: 18),
+              onPressed: exportAll,
+              label: Text(localizations.export)),
+          const SizedBox(width: 5),
+          TextButton.icon(
               icon: const Icon(Icons.input_rounded, size: 18), onPressed: import, label: Text(localizations.import)),
           const SizedBox(width: 5),
         ]),
@@ -185,6 +190,23 @@ class _DomainFilterState extends State<DomainFilter> {
       if (mounted) {
         FlutterToastr.show("${localizations.importFailed} $e", context);
       }
+    }
+  }
+
+  Future<void> exportAll() async {
+    if (widget.hostList.list.isEmpty) return;
+
+    const fileName = 'host-filters.config';
+    String? saveLocation = await FilePicker.platform.saveFile(fileName: fileName);
+    if (saveLocation == null) {
+      return;
+    }
+
+    var list = widget.hostList.list.map((rule) => rule.pattern.replaceAll(".*", "*")).toList();
+    await File(saveLocation).writeAsBytes(utf8.encode(jsonEncode(list)));
+
+    if (mounted) {
+      FlutterToastr.show(localizations.exportSuccess, context);
     }
   }
 

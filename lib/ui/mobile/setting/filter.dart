@@ -16,6 +16,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -127,6 +128,11 @@ class _DomainFilterState extends State<DomainFilter> {
           TextButton.icon(icon: const Icon(Icons.add, size: 20), onPressed: add, label: Text(localizations.add)),
           const SizedBox(width: 10),
           TextButton.icon(
+              icon: const Icon(Icons.output_rounded, size: 20),
+              onPressed: exportAll,
+              label: Text(localizations.export)),
+          const SizedBox(width: 10),
+          TextButton.icon(
               icon: const Icon(Icons.input_rounded, size: 20), onPressed: import, label: Text(localizations.import)),
           const SizedBox(width: 5),
         ]),
@@ -158,6 +164,19 @@ class _DomainFilterState extends State<DomainFilter> {
       if (mounted) {
         FlutterToastr.show("${localizations.importFailed} $e", context);
       }
+    }
+  }
+
+  Future<void> exportAll() async {
+    if (widget.hostList.list.isEmpty) return;
+
+    const fileName = 'host-filters.config';
+    final list = widget.hostList.list.map((rule) => rule.pattern.replaceAll(".*", "*")).toList();
+    final bytes = Uint8List.fromList(utf8.encode(jsonEncode(list)));
+    final path = await FilePicker.platform.saveFile(fileName: fileName, bytes: bytes);
+
+    if (path != null && mounted) {
+      FlutterToastr.show(localizations.exportSuccess, context);
     }
   }
 
