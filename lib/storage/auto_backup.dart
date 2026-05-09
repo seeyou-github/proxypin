@@ -12,14 +12,21 @@ class AutoBackup {
   static const whiteHostFiltersFileName = 'AutoBackup_host-filters-white.config';
 
   static bool _isBackingUp = false;
+  static bool _backupPending = false;
 
-  static Future<void> backupAll({String? favoritesJson}) async {
+  static Future<bool> backupAll({String? favoritesJson}) async {
     final backupDirectory = AppConfiguration.current?.autoBackupDirectory;
-    if (backupDirectory == null || backupDirectory.trim().isEmpty || _isBackingUp) {
-      return;
+    if (backupDirectory == null || backupDirectory.trim().isEmpty) {
+      return false;
+    }
+
+    if (_isBackingUp) {
+      _backupPending = true;
+      return false;
     }
 
     _isBackingUp = true;
+    var success = false;
     try {
       final directory = Directory(backupDirectory);
       if (!await directory.exists()) {
@@ -32,11 +39,17 @@ class AutoBackup {
           _hostFiltersJson(HostFilter.blacklist));
       await _overwriteFile(File('${directory.path}${Platform.pathSeparator}$whiteHostFiltersFileName'),
           _hostFiltersJson(HostFilter.whitelist));
+      success = true;
     } catch (e, t) {
       logger.e('auto backup failed', error: e, stackTrace: t);
     } finally {
       _isBackingUp = false;
+      if (_backupPending) {
+        _backupPending = false;
+        success = await backupAll() || success;
+      }
     }
+    return success;
   }
 
   static Future<String> _readFavoritesJson() async {

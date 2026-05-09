@@ -64,6 +64,8 @@ class Configuration {
   //默认是否启动
   bool startup = false;
 
+  String? _lastBackedUpHostFiltersJson;
+
   Configuration._();
 
   /// 单例
@@ -101,6 +103,7 @@ class Configuration {
     appBlacklist = config['appBlacklist'] == null ? null : List<String>.from(config['appBlacklist']);
     HostFilter.whitelist.load(config['whitelist']);
     HostFilter.blacklist.load(config['blacklist']);
+    _lastBackedUpHostFiltersJson = _hostFiltersJson();
   }
 
   /// 配置文件
@@ -117,12 +120,22 @@ class Configuration {
     if (!exists) {
       file = await file.create(recursive: true);
     }
-    HostFilter.whitelist.toJson();
-    HostFilter.blacklist.toJson();
+    final hostFiltersJson = _hostFiltersJson();
     var json = jsonEncode(toJson());
     logger.d('Refresh configuration file $runtimeType ${toJson()}');
     await file.writeAsString(json);
-    await AutoBackup.backupAll();
+    if (_lastBackedUpHostFiltersJson != hostFiltersJson) {
+      if (await AutoBackup.backupAll()) {
+        _lastBackedUpHostFiltersJson = hostFiltersJson;
+      }
+    }
+  }
+
+  String _hostFiltersJson() {
+    return jsonEncode({
+      'whitelist': HostFilter.whitelist.toJson(),
+      'blacklist': HostFilter.blacklist.toJson(),
+    });
   }
 
   /// 加载配置文件

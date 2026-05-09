@@ -140,10 +140,10 @@ class DetailMenuWidget extends StatelessWidget {
         itemBuilder: (context) => [
               PopupMenuItem(
                   child: Text(localizations.favorite),
-                  onTap: () {
+                  onTap: () async {
                     if (request == null) return;
 
-                    FavoriteStorage.addFavorite(request!);
+                    await FavoriteStorage.addFavorite(request!);
                     FlutterToastr.show(localizations.addSuccess, context);
                   }),
               PopupMenuItem(

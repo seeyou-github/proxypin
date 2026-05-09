@@ -261,8 +261,8 @@ class _RequestWidgetState extends State<RequestWidget> {
       MenuItem.separator(),
       MenuItem(
           label: localizations.favorite,
-          onClick: (_) {
-            FavoriteStorage.addFavorite(widget.request);
+          onClick: (_) async {
+            await FavoriteStorage.addFavorite(widget.request);
             FlutterToastr.show(localizations.operationSuccess, context, rootNavigator: true);
           }),
       MenuItem(

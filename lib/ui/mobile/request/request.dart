@@ -256,8 +256,8 @@ class RequestRowState extends State<RequestRow> {
               //favorite and edit
               menuItem(
                 left: itemButton(
-                    onPressed: () {
-                      FavoriteStorage.addFavorite(widget.request);
+                    onPressed: () async {
+                      await FavoriteStorage.addFavorite(widget.request);
                       FlutterToastr.show(localizations.addSuccess, availableContext);
                       Navigator.maybePop(availableContext);
                     },

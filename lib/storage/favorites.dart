@@ -69,7 +69,7 @@ class FavoriteStorage {
     final favorite = _snapshotFavorite(request);
     trimFavoriteMessages(favorite);
     favorites.addFirst(favorite);
-    flushConfig();
+    await flushConfig();
     //通知
     addNotifier?.call();
   }
@@ -83,7 +83,7 @@ class FavoriteStorage {
   static Future<void> removeFavorite(Favorite favorite) async {
     var list = await favorites;
     list.remove(favorite);
-    flushConfig();
+    await flushConfig();
   }
 
   //刷新配置

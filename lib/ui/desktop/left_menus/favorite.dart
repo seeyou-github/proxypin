@@ -90,8 +90,8 @@ class _FavoritesState extends State<Favorites> {
                   request,
                   index: index - 1,
                   panel: widget.panel,
-                  onRemove: (Favorite favorite) {
-                    FavoriteStorage.removeFavorite(favorite);
+                  onRemove: (Favorite favorite) async {
+                    await FavoriteStorage.removeFavorite(favorite);
                     CustomToast.success(localizations.deleteFavoriteSuccess).show(context);
                     setState(() {});
                   },
@@ -253,12 +253,12 @@ class _FavoriteItemState extends State<_FavoriteItem> {
               TextButton(onPressed: () => Navigator.pop(context), child: Text(localizations.cancel)),
               TextButton(
                 child: Text(localizations.save),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.maybePop(context);
                   setState(() {
                     item.name = name?.isEmpty == true ? null : name;
-                    FavoriteStorage.flushConfig();
                   });
+                  await FavoriteStorage.flushConfig();
                 },
               ),
             ],

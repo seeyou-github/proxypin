@@ -107,6 +107,12 @@ class _DomainFilterState extends State<DomainFilter> {
     super.dispose();
   }
 
+  Future<void> persistChange() async {
+    changed = true;
+    await widget.configuration.flushConfig();
+    changed = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -120,7 +126,7 @@ class _DomainFilterState extends State<DomainFilter> {
                   value: widget.hostList.enabled,
                   onChanged: (value) {
                     widget.hostList.enabled = value;
-                    changed = true;
+                    persistChange();
                     widget.hostEnableNotifier.value = !widget.hostEnableNotifier.value;
                   });
             }),
@@ -141,7 +147,7 @@ class _DomainFilterState extends State<DomainFilter> {
               icon: const Icon(Icons.input_rounded, size: 20), onPressed: import, label: Text(localizations.import)),
           const SizedBox(width: 5),
         ]),
-        Expanded(child: DomainList(widget.hostList, onChange: () => changed = true))
+        Expanded(child: DomainList(widget.hostList, onChange: persistChange))
       ],
     );
   }
@@ -159,7 +165,7 @@ class _DomainFilterState extends State<DomainFilter> {
         widget.hostList.add(item);
       }
 
-      changed = true;
+      await persistChange();
       if (mounted) {
         FlutterToastr.show(localizations.importSuccess, context);
       }
@@ -178,7 +184,7 @@ class _DomainFilterState extends State<DomainFilter> {
     return showConfirmDialog(context, content: localizations.requestRewriteDeleteConfirm(widget.hostList.list.length),
         onConfirm: () async {
       widget.hostList.list.clear();
-      changed = true;
+      await persistChange();
       setState(() {});
       if (mounted) FlutterToastr.show(localizations.deleteSuccess, context);
     });
@@ -201,8 +207,8 @@ class _DomainFilterState extends State<DomainFilter> {
     showDialog(context: context, builder: (BuildContext context) => DomainAddDialog(hostList: widget.hostList))
         .then((value) {
       if (value != null) {
+        persistChange();
         setState(() {
-          changed = true;
         });
       }
     });
