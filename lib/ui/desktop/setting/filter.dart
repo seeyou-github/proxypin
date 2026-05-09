@@ -148,6 +148,9 @@ class _DomainFilterState extends State<DomainFilter> {
                 changed = true;
               }),
           const Expanded(child: SizedBox()),
+          TextButton.icon(
+              icon: const Icon(Icons.clear_all_rounded, size: 18), onPressed: clearAll, label: Text(localizations.clear)),
+          const SizedBox(width: 5),
           TextButton.icon(icon: const Icon(Icons.add, size: 18), onPressed: add, label: Text(localizations.add)),
           const SizedBox(width: 5),
           TextButton.icon(
@@ -191,6 +194,18 @@ class _DomainFilterState extends State<DomainFilter> {
         FlutterToastr.show("${localizations.importFailed} $e", context);
       }
     }
+  }
+
+  Future<void> clearAll() async {
+    if (widget.hostList.list.isEmpty) return;
+
+    return showConfirmDialog(context, content: localizations.requestRewriteDeleteConfirm(widget.hostList.list.length),
+        onConfirm: () async {
+      widget.hostList.list.clear();
+      changed = true;
+      setState(() {});
+      if (mounted) FlutterToastr.show(localizations.deleteSuccess, context);
+    });
   }
 
   Future<void> exportAll() async {
@@ -299,6 +314,7 @@ class _DomainListState extends State<DomainList> {
 
   @override
   Widget build(BuildContext context) {
+    selected.removeWhere((index, _) => index >= widget.hostList.list.length);
     return GestureDetector(
         onSecondaryTapDown: (details) => showGlobalMenu(details.globalPosition),
         onTapDown: (details) {

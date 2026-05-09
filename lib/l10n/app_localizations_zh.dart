@@ -231,9 +231,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get all => '全部';
 
   @override
-  String get selectAll => '全选';
-
-  @override
   String get modify => '修改';
 
   @override
@@ -1320,9 +1317,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get all => '全部';
-
-  @override
-  String get selectAll => '全選';
 
   @override
   String get modify => '修改';

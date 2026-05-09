@@ -125,6 +125,11 @@ class _DomainFilterState extends State<DomainFilter> {
                   });
             }),
         Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          TextButton.icon(
+              icon: const Icon(Icons.clear_all_rounded, size: 20),
+              onPressed: clearAll,
+              label: Text(localizations.clear)),
+          const SizedBox(width: 10),
           TextButton.icon(icon: const Icon(Icons.add, size: 20), onPressed: add, label: Text(localizations.add)),
           const SizedBox(width: 10),
           TextButton.icon(
@@ -165,6 +170,18 @@ class _DomainFilterState extends State<DomainFilter> {
         FlutterToastr.show("${localizations.importFailed} $e", context);
       }
     }
+  }
+
+  Future<void> clearAll() async {
+    if (widget.hostList.list.isEmpty) return;
+
+    return showConfirmDialog(context, content: localizations.requestRewriteDeleteConfirm(widget.hostList.list.length),
+        onConfirm: () async {
+      widget.hostList.list.clear();
+      changed = true;
+      setState(() {});
+      if (mounted) FlutterToastr.show(localizations.deleteSuccess, context);
+    });
   }
 
   Future<void> exportAll() async {
@@ -265,6 +282,7 @@ class _DomainListState extends State<DomainList> {
 
   @override
   Widget build(BuildContext context) {
+    selected.removeWhere((index) => index >= widget.hostList.list.length);
     return Scaffold(
         persistentFooterButtons: multiple ? [globalMenu()] : null,
         body: Container(
@@ -400,17 +418,6 @@ class _DomainListState extends State<DomainList> {
                     child: Text(localizations.multiple),
                     onPressed: () {
                       setState(() => multiple = true);
-                      Navigator.of(context).pop();
-                    }),
-                CupertinoActionSheetAction(
-                    child: Text(localizations.selectAll),
-                    onPressed: () {
-                      setState(() {
-                        multiple = true;
-                        selected
-                          ..clear()
-                          ..addAll(List.generate(widget.hostList.list.length, (i) => i));
-                      });
                       Navigator.of(context).pop();
                     }),
                 CupertinoActionSheetAction(
