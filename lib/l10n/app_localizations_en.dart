@@ -232,6 +232,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get all => 'All';
 
   @override
+  String get selectAll => 'Select all';
+
+  @override
   String get modify => 'Modify';
 
   @override

@@ -403,6 +403,17 @@ class _DomainListState extends State<DomainList> {
                       Navigator.of(context).pop();
                     }),
                 CupertinoActionSheetAction(
+                    child: Text(localizations.selectAll),
+                    onPressed: () {
+                      setState(() {
+                        multiple = true;
+                        selected
+                          ..clear()
+                          ..addAll(List.generate(widget.hostList.list.length, (i) => i));
+                      });
+                      Navigator.of(context).pop();
+                    }),
+                CupertinoActionSheetAction(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: widget.hostList.list[index].pattern.replaceAll(".*", "*")));
                       FlutterToastr.show(localizations.copied, context);

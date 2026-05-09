@@ -72,6 +72,7 @@
   "requestSuccess": "請求成功",
   "add": "新增",
   "all": "全部",
+  "selectAll": "全選",
   "modify": "修改",
   "responseType": "回應類型",
   "request": "請求",
