@@ -21,7 +21,6 @@ import 'package:proxypin/l10n/app_localizations.dart';
 import 'package:proxypin/network/bin/configuration.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/storage/auto_backup.dart';
-import 'package:proxypin/storage/auto_backup_log.dart';
 import 'package:proxypin/ui/component/widgets.dart';
 import 'package:proxypin/ui/configuration.dart';
 
@@ -179,25 +178,17 @@ class _PreferenceState extends State<Preference> {
   }
 
   Future<void> selectAutoBackupDirectory() async {
-    await AutoBackupLog.info('Desktop auto backup directory selection started');
     String? path = await FilePicker.platform.getDirectoryPath();
     if (path == null) {
-      await AutoBackupLog.warn('Desktop auto backup directory selection cancelled');
       return;
     }
 
-    await AutoBackupLog.info('Desktop auto backup directory selected', {'path': path});
     setState(() {
       appConfiguration.autoBackupDirectory = path;
       appConfiguration.autoBackupPrompted = true;
     });
     await appConfiguration.flushConfig();
-    await AutoBackupLog.info('Desktop auto backup directory saved to config', {'path': path});
-    final backupSuccess = await AutoBackup.backupAll(reason: 'desktop-directory-selected');
-    await AutoBackupLog.info('Desktop auto backup directory validation finished', {
-      'path': path,
-      'success': backupSuccess,
-    });
+    final backupSuccess = await AutoBackup.backupAll();
     if (mounted) {
       if (backupSuccess) {
         FlutterToastr.show(localizations.success, context);

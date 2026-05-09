@@ -10,7 +10,6 @@ import 'package:proxypin/network/bin/configuration.dart';
 import 'package:proxypin/network/bin/server.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/storage/auto_backup.dart';
-import 'package:proxypin/storage/auto_backup_log.dart';
 import 'package:proxypin/ui/component/widgets.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/mobile/setting/theme.dart';
@@ -168,34 +167,19 @@ class _PreferenceState extends State<Preference> {
   }
 
   Future<void> selectAutoBackupDirectory() async {
-    await AutoBackupLog.info('Mobile auto backup directory selection started', {
-      'isAndroid': Platform.isAndroid,
-    });
     String? path = Platform.isAndroid
         ? await AutoBackupStorage.selectDirectory()
         : await FilePicker.platform.getDirectoryPath();
     if (path == null) {
-      await AutoBackupLog.warn('Mobile auto backup directory selection cancelled', {
-        'isAndroid': Platform.isAndroid,
-      });
       return;
     }
 
-    await AutoBackupLog.info('Mobile auto backup directory selected', {
-      'isAndroid': Platform.isAndroid,
-      'path': path,
-    });
     setState(() {
       appConfiguration.autoBackupDirectory = path;
       appConfiguration.autoBackupPrompted = true;
     });
     await appConfiguration.flushConfig();
-    await AutoBackupLog.info('Mobile auto backup directory saved to config', {'path': path});
-    final backupSuccess = await AutoBackup.backupAll(reason: 'mobile-directory-selected');
-    await AutoBackupLog.info('Mobile auto backup directory validation finished', {
-      'path': path,
-      'success': backupSuccess,
-    });
+    final backupSuccess = await AutoBackup.backupAll();
     if (mounted) {
       if (backupSuccess) {
         FlutterToastr.show(localizations.success, context);

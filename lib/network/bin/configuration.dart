@@ -23,7 +23,6 @@ import 'package:proxypin/network/components/host_filter.dart';
 import 'package:proxypin/network/util/logger.dart';
 import 'package:proxypin/network/util/system_proxy.dart';
 import 'package:proxypin/storage/auto_backup.dart';
-import 'package:proxypin/storage/auto_backup_log.dart';
 import 'package:proxypin/utils/platform.dart';
 
 class Configuration {
@@ -124,28 +123,10 @@ class Configuration {
     final hostFiltersJson = _hostFiltersJson();
     var json = jsonEncode(toJson());
     logger.d('Refresh configuration file $runtimeType ${toJson()}');
-    await AutoBackupLog.info('Network configuration write started', {
-      'path': file.path,
-      'bytes': json.length,
-      'blackHostCount': HostFilter.blacklist.list.length,
-      'whiteHostCount': HostFilter.whitelist.list.length,
-      'hostFiltersChanged': _lastBackedUpHostFiltersJson != hostFiltersJson,
-    });
     await file.writeAsString(json);
-    await AutoBackupLog.info('Network configuration write finished', {
-      'path': file.path,
-      'hostFiltersChanged': _lastBackedUpHostFiltersJson != hostFiltersJson,
-    });
     if (_lastBackedUpHostFiltersJson != hostFiltersJson) {
-      await AutoBackupLog.info('Host filters changed, auto backup will run', {
-        'blackHostCount': HostFilter.blacklist.list.length,
-        'whiteHostCount': HostFilter.whitelist.list.length,
-      });
-      if (await AutoBackup.backupAll(reason: 'host-filters-flush')) {
+      if (await AutoBackup.backupAll()) {
         _lastBackedUpHostFiltersJson = hostFiltersJson;
-        await AutoBackupLog.info('Host filters backup snapshot updated');
-      } else {
-        await AutoBackupLog.warn('Host filters backup failed or skipped, snapshot was not updated');
       }
     }
   }
