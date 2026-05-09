@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:proxypin/l10n/app_localizations.dart';
-import 'package:proxypin/ui/app_update/app_update_repository.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,8 +13,6 @@ class DesktopAbout extends StatefulWidget {
 }
 
 class _AppUpdateStateChecking extends State<DesktopAbout> {
-  bool checkUpdating = false;
-
   AppLocalizations get localizations => AppLocalizations.of(context)!;
 
   @override
@@ -62,18 +59,6 @@ class _AppUpdateStateChecking extends State<DesktopAbout> {
                   title: Text(localizations.feedback),
                   trailing: const Icon(Icons.open_in_new, size: 21),
                   onTap: () => _safeLaunch(Uri.parse("$gitHub/issues"))),
-              ListTile(
-                  dense: true,
-                  title: Text(localizations.appUpdateCheckVersion),
-                  trailing: checkUpdating
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.sync, size: 21),
-                  onTap: () async {
-                    if (checkUpdating) return;
-                    setState(() => checkUpdating = true);
-                    await AppUpdateRepository.checkUpdate(context, canIgnore: false, showToast: true);
-                    if (mounted) setState(() => checkUpdating = false);
-                  }),
               ListTile(
                   dense: true,
                   title: Text(isCN ? "下载地址" : "Download"),
