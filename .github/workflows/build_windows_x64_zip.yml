@@ -1,0 +1,52 @@
+name: Build Windows x64 ZIP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Windows x64 ZIP
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows x64
+        run: flutter build windows --release --target-platform windows-x64
+
+      - name: Package ZIP
+        shell: pwsh
+        run: |
+          $releaseDir = "build/windows/x64/runner/Release"
+          $zipPath = "build/proxypin-windows-x64.zip"
+          if (!(Test-Path $releaseDir)) {
+            throw "Windows release directory not found: $releaseDir"
+          }
+          if (Test-Path $zipPath) {
+            Remove-Item -LiteralPath $zipPath -Force
+          }
+          Compress-Archive -Path "$releaseDir/*" -DestinationPath $zipPath -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxypin-windows-x64-zip
+          path: build/proxypin-windows-x64.zip
+          if-no-files-found: error
+

@@ -1,0 +1,56 @@
+name: Build Android arm-v8a
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    name: Android arm-v8a APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Check signing keystore
+        run: test -f TestKey.jks
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android split APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Collect arm-v8a APK
+        run: |
+          mkdir -p build/artifacts
+          apk_path="$(find build/app/outputs -name '*arm64-v8a*.apk' -type f | head -n 1)"
+          if [ -z "$apk_path" ]; then
+            echo "No arm64-v8a APK found under build/app/outputs"
+            find build/app/outputs -name '*.apk' -type f -print
+            exit 1
+          fi
+          cp "$apk_path" build/artifacts/proxypin-android-arm-v8a.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxypin-android-arm-v8a
+          path: build/artifacts/proxypin-android-arm-v8a.apk
+          if-no-files-found: error
