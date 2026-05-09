@@ -7,7 +7,6 @@ on:
         description: Android applicationId to build with
         required: false
         default: com.network.proxy
-  push:
 
 jobs:
   build:
