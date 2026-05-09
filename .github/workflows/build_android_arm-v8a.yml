@@ -34,6 +34,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Prepare split ABI Gradle config
+        run: |
+          sed -i "/ndk { abiFilters/d" android/app/build.gradle
+          perl -0pi -e 's/\n\/\/ Set a fixed APK name for release builds.*?\n\ndependencies \{/\n\ndependencies {/s' android/app/build.gradle
+
       - name: Build Android split APKs
         run: flutter build apk --release --split-per-abi
 
