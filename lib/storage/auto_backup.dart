@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,8 +12,11 @@ class AutoBackup {
   static const blackHostFiltersFileName = 'AutoBackup_host-filters-black.config';
   static const whiteHostFiltersFileName = 'AutoBackup_host-filters-white.config';
 
+  static final StreamController<void> _backupDirectoryInvalidController = StreamController<void>.broadcast();
   static bool _isBackingUp = false;
   static bool _backupPending = false;
+
+  static Stream<void> get onBackupDirectoryInvalid => _backupDirectoryInvalidController.stream;
 
   static Future<bool> backupAll({String? favoritesJson}) async {
     final backupDirectory = AppConfiguration.current?.autoBackupDirectory;
@@ -42,6 +46,7 @@ class AutoBackup {
       success = true;
     } catch (e, t) {
       logger.e('auto backup failed', error: e, stackTrace: t);
+      await _clearInvalidBackupDirectory();
     } finally {
       _isBackingUp = false;
       if (_backupPending) {
@@ -50,6 +55,18 @@ class AutoBackup {
       }
     }
     return success;
+  }
+
+  static Future<void> _clearInvalidBackupDirectory() async {
+    final configuration = AppConfiguration.current;
+    if (configuration == null || configuration.autoBackupDirectory == null) {
+      return;
+    }
+
+    configuration.autoBackupDirectory = null;
+    configuration.autoBackupPrompted = false;
+    await configuration.flushConfig();
+    _backupDirectoryInvalidController.add(null);
   }
 
   static Future<String> _readFavoritesJson() async {

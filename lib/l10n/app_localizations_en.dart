@@ -857,6 +857,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.';
 
   @override
+  String get autoBackupDirectoryInvalidPrompt =>
+      'The auto backup directory is unavailable. Please select a new auto backup directory.';
+
+  @override
   String get notSet => 'Not set';
 
   @override

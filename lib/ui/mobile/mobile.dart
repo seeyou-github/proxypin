@@ -33,6 +33,7 @@ import 'package:proxypin/network/channel/channel_context.dart';
 import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/websocket.dart';
 import 'package:proxypin/network/http/http_client.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/storage/histories.dart';
 import 'package:proxypin/ui/component/memory_cleanup.dart';
 import 'package:proxypin/ui/toolbox/toolbox.dart';
@@ -45,6 +46,7 @@ import 'package:proxypin/ui/mobile/menu/menu.dart';
 import 'package:proxypin/ui/mobile/request/history.dart';
 import 'package:proxypin/ui/mobile/request/list.dart';
 import 'package:proxypin/ui/mobile/request/search.dart';
+import 'package:proxypin/ui/mobile/setting/preference.dart' as mobile_setting;
 import 'package:proxypin/ui/mobile/widgets/pip.dart';
 import 'package:proxypin/ui/mobile/widgets/remote_device.dart';
 import 'package:proxypin/utils/ip.dart';
@@ -85,6 +87,8 @@ class MobileHomeState extends State<MobileHomePage> implements EventListener, Li
   final ValueNotifier<int> _selectIndex = ValueNotifier(0);
 
   StreamSubscription<HistoryItem>? _remoteHistorySubscription;
+  StreamSubscription<void>? _autoBackupFailureSubscription;
+  bool _autoBackupFailureDialogShowing = false;
 
   late ProxyServer proxyServer;
 
@@ -123,6 +127,9 @@ class MobileHomeState extends State<MobileHomePage> implements EventListener, Li
     proxyServer.addListener(this);
     proxyServer.start();
     _remoteHistorySubscription = HistoryStorage.onRemoteImported.listen((item) => _openHistoryPage(item));
+    _autoBackupFailureSubscription = AutoBackup.onBackupDirectoryInvalid.listen((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => showAutoBackupDirectoryInvalidPrompt());
+    });
 
     // Handle breakpoint window on mobile
     MultiWindow.onOpenWindow = (widgetName, args) async {
@@ -148,7 +155,36 @@ class MobileHomeState extends State<MobileHomePage> implements EventListener, Li
   void dispose() {
     AppLifecycleBinding.instance.removeListener(this);
     _remoteHistorySubscription?.cancel();
+    _autoBackupFailureSubscription?.cancel();
     super.dispose();
+  }
+
+  void showAutoBackupDirectoryInvalidPrompt() {
+    if (!mounted || _autoBackupFailureDialogShowing) {
+      return;
+    }
+
+    final localizations = AppLocalizations.of(context)!;
+    _autoBackupFailureDialogShowing = true;
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+              title: Text(localizations.autoBackupDirectory),
+              content: Text(localizations.autoBackupDirectoryInvalidPrompt),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => mobile_setting.Preference(
+                              proxyServer: proxyServer, appConfiguration: widget.appConfiguration)));
+                    },
+                    child: Text(localizations.confirm)),
+              ],
+            )).whenComplete(() {
+      _autoBackupFailureDialogShowing = false;
+    });
   }
 
   void toRequestsView(HistoryItem item, HistoryStorage storage) {}

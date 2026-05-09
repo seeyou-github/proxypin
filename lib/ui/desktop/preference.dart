@@ -188,9 +188,11 @@ class _PreferenceState extends State<Preference> {
       appConfiguration.autoBackupPrompted = true;
     });
     await appConfiguration.flushConfig();
-    await AutoBackup.backupAll();
+    final backupSuccess = await AutoBackup.backupAll();
     if (mounted) {
-      FlutterToastr.show(localizations.success, context);
+      if (backupSuccess) {
+        FlutterToastr.show(localizations.success, context);
+      }
     }
   }
 

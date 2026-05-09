@@ -26,6 +26,7 @@ import 'package:proxypin/network/channel/channel.dart';
 import 'package:proxypin/network/channel/channel_context.dart';
 import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/websocket.dart';
+import 'package:proxypin/storage/auto_backup.dart';
 import 'package:proxypin/storage/histories.dart';
 import 'package:proxypin/ui/component/memory_cleanup.dart';
 import 'package:proxypin/ui/component/widgets.dart';
@@ -62,6 +63,8 @@ class _DesktopHomePagePageState extends State<DesktopHomePage> implements EventL
 
   final ValueNotifier<int> _selectIndex = ValueNotifier(0);
   StreamSubscription<HistoryItem>? _remoteHistorySubscription;
+  StreamSubscription<void>? _autoBackupFailureSubscription;
+  bool _autoBackupFailureDialogShowing = false;
 
   late ProxyServer proxyServer = ProxyServer(widget.configuration);
   late NetworkTabController panel;
@@ -77,7 +80,7 @@ class _DesktopHomePagePageState extends State<DesktopHomePage> implements EventL
       panel.change(request, request.response);
     }
 
-    //监控内存 到达阈值清�?
+    // Monitor memory and clean early data after reaching threshold.
     MemoryCleanupMonitor.onMonitor(onCleanup: () {
       requestListStateKey.currentState?.cleanupEarlyData(32);
     });
@@ -105,6 +108,9 @@ class _DesktopHomePagePageState extends State<DesktopHomePage> implements EventL
         _selectIndex.value = 2;
       }
     });
+    _autoBackupFailureSubscription = AutoBackup.onBackupDirectoryInvalid.listen((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => showAutoBackupDirectoryInvalidPrompt());
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => showAutoBackupPrompt());
   }
@@ -112,6 +118,7 @@ class _DesktopHomePagePageState extends State<DesktopHomePage> implements EventL
   @override
   void dispose() {
     _remoteHistorySubscription?.cancel();
+    _autoBackupFailureSubscription?.cancel();
     super.dispose();
   }
 
@@ -188,5 +195,33 @@ class _DesktopHomePagePageState extends State<DesktopHomePage> implements EventL
                     child: Text(localizations.confirm)),
               ],
             ));
+  }
+
+  void showAutoBackupDirectoryInvalidPrompt() {
+    if (!mounted || _autoBackupFailureDialogShowing) {
+      return;
+    }
+
+    final localizations = AppLocalizations.of(context)!;
+    _autoBackupFailureDialogShowing = true;
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+              title: Text(localizations.autoBackupDirectory),
+              content: Text(localizations.autoBackupDirectoryInvalidPrompt),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (_) => Preference(widget.appConfiguration, proxyServer.configuration));
+                    },
+                    child: Text(localizations.confirm)),
+              ],
+            )).whenComplete(() {
+      _autoBackupFailureDialogShowing = false;
+    });
   }
 }

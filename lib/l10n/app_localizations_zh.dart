@@ -846,6 +846,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoBackupDirectoryPrompt => '请设置自动备份目录。收藏、代理域名白名单和代理域名黑名单将自动备份。';
 
   @override
+  String get autoBackupDirectoryInvalidPrompt => '自动备份目录不可用，请重新选择自动备份目录。';
+
+  @override
   String get notSet => '未设置';
 
   @override
@@ -1941,6 +1944,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get autoBackupDirectoryPrompt => '請設定自動備份目錄。收藏、代理網域白名單和代理網域黑名單將自動備份。';
+
+  @override
+  String get autoBackupDirectoryInvalidPrompt => '自動備份目錄不可用，請重新選擇自動備份目錄。';
 
   @override
   String get notSet => '未設定';

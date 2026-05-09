@@ -1740,6 +1740,12 @@ abstract class AppLocalizations {
   /// **'Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.'**
   String get autoBackupDirectoryPrompt;
 
+  /// No description provided for @autoBackupDirectoryInvalidPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'The auto backup directory is unavailable. Please select a new auto backup directory.'**
+  String get autoBackupDirectoryInvalidPrompt;
+
   /// No description provided for @notSet.
   ///
   /// In en, this message translates to:

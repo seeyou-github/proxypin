@@ -290,6 +290,7 @@
   "memoryCleanupSubtitle": "Automatically clean up requests on memory limit reached and keep 32 most recent after cleaning",
   "autoBackupDirectory": "Auto backup directory",
   "autoBackupDirectoryPrompt": "Please set an auto backup directory. Favorites, proxy domain whitelist, and proxy domain blacklist will be backed up automatically.",
+  "autoBackupDirectoryInvalidPrompt": "The auto backup directory is unavailable. Please select a new auto backup directory.",
   "notSet": "Not set",
   "unlimited": "Unlimited",
   "custom": "Custom",
