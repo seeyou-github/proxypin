@@ -211,7 +211,7 @@ class _DomainFilterState extends State<DomainFilter> {
   Future<void> exportAll() async {
     if (widget.hostList.list.isEmpty) return;
 
-    const fileName = 'host-filters.config';
+    final fileName = widget.hostList is Blacks ? 'host-filters-black.config' : 'host-filters-white.config';
     String? saveLocation = await FilePicker.platform.saveFile(fileName: fileName);
     if (saveLocation == null) {
       return;
