@@ -181,17 +181,17 @@ class _JsonBodyEditorState extends State<JsonBodyEditor> {
             spacing: 2,
             children: [
               TextButton(
-                visualDensity: VisualDensity.compact,
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                 onPressed: _urlDecodeJsonValues,
                 child: Text(localizations.urlDecode),
               ),
               TextButton(
-                visualDensity: VisualDensity.compact,
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                 onPressed: _urlEncodeJsonValues,
                 child: Text(localizations.urlEncode),
               ),
               TextButton(
-                visualDensity: VisualDensity.compact,
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                 onPressed: _formatJson,
                 child: Text(localizations.jsonFormat),
               ),

@@ -295,7 +295,7 @@ class HttpBodyState extends State<HttpBodyWidget> {
         });
 
     final urlDecodeBtn = TextButton(
-        visualDensity: visualDensity,
+        style: TextButton.styleFrom(visualDensity: visualDensity),
         child: Text(localizations.urlDecode),
         onPressed: () {
           setState(() {
@@ -304,7 +304,7 @@ class HttpBodyState extends State<HttpBodyWidget> {
         });
 
     final urlEncodeBtn = TextButton(
-        visualDensity: visualDensity,
+        style: TextButton.styleFrom(visualDensity: visualDensity),
         child: Text(localizations.urlEncode),
         onPressed: () {
           setState(() {
