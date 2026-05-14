@@ -388,5 +388,8 @@
 
   "local": "本地",
   "remoteUrl": "远程URL",
+  "urlEncode": "Url编码",
+  "urlDecode": "Url解码",
+  "jsonFormat": "Json格式化",
   "view": "查看"
 }

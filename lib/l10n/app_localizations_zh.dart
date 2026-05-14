@@ -1104,6 +1104,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get remoteUrl => '远程URL';
 
   @override
+  String get urlEncode => 'Url编码';
+
+  @override
+  String get urlDecode => 'Url解码';
+
+  @override
+  String get jsonFormat => 'Json格式化';
+
+  @override
   String get view => '查看';
 }
 
@@ -2203,6 +2212,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get remoteUrl => '遠端URL';
+
+  @override
+  String get urlEncode => 'Url編碼';
+
+  @override
+  String get urlDecode => 'Url解碼';
+
+  @override
+  String get jsonFormat => 'Json格式化';
 
   @override
   String get view => '檢視';

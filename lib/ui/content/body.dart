@@ -294,22 +294,18 @@ class HttpBodyState extends State<HttpBodyWidget> {
           }
         });
 
-    final urlDecodeBtn = IconButton(
+    final urlDecodeBtn = TextButton(
         visualDensity: visualDensity,
-        iconSize: 18,
-        icon: const Icon(Icons.link_off),
-        tooltip: 'URL Decode',
+        child: Text(localizations.urlDecode),
         onPressed: () {
           setState(() {
             showUrlDecoded = true;
           });
         });
 
-    final urlEncodeBtn = IconButton(
+    final urlEncodeBtn = TextButton(
         visualDensity: visualDensity,
-        iconSize: 18,
-        icon: const Icon(Icons.link),
-        tooltip: 'URL Encode',
+        child: Text(localizations.urlEncode),
         onPressed: () {
           setState(() {
             showUrlDecoded = false;
@@ -346,8 +342,8 @@ class HttpBodyState extends State<HttpBodyWidget> {
         overflowItems.add(PopupMenuItem(value: 'rewrite', child: Text(localizations.requestRewrite)));
       }
       overflowItems.add(PopupMenuItem(value: 'encode', child: Text(localizations.encode)));
-      overflowItems.add(const PopupMenuItem(value: 'url_decode', child: Text('URL Decode')));
-      overflowItems.add(const PopupMenuItem(value: 'url_encode', child: Text('URL Encode')));
+      overflowItems.add(PopupMenuItem(value: 'url_decode', child: Text(localizations.urlDecode)));
+      overflowItems.add(PopupMenuItem(value: 'url_encode', child: Text(localizations.urlEncode)));
       if (!inNewWindow) {
         overflowItems.add(PopupMenuItem(value: 'new_window', child: Text(localizations.newWindow)));
       }

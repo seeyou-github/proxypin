@@ -1120,5 +1120,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remoteUrl => 'Remote URL';
 
   @override
+  String get urlEncode => 'Url Encode';
+
+  @override
+  String get urlDecode => 'Url Decode';
+
+  @override
+  String get jsonFormat => 'Json Format';
+
+  @override
   String get view => 'View';
 }

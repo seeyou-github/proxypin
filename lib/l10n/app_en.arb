@@ -387,5 +387,8 @@
 
   "local": "Local",
   "remoteUrl": "Remote URL",
+  "urlEncode": "Url Encode",
+  "urlDecode": "Url Decode",
+  "jsonFormat": "Json Format",
   "view": "View"
 }

@@ -2250,6 +2250,24 @@ abstract class AppLocalizations {
   /// **'Remote URL'**
   String get remoteUrl;
 
+  /// No description provided for @urlEncode.
+  ///
+  /// In en, this message translates to:
+  /// **'Url Encode'**
+  String get urlEncode;
+
+  /// No description provided for @urlDecode.
+  ///
+  /// In en, this message translates to:
+  /// **'Url Decode'**
+  String get urlDecode;
+
+  /// No description provided for @jsonFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Json Format'**
+  String get jsonFormat;
+
   /// No description provided for @view.
   ///
   /// In en, this message translates to:

@@ -123,6 +123,7 @@ class _JsonBodyEditorState extends State<JsonBodyEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     if (!_jsonMode) {
       return TextField(
         autofocus: widget.autofocus,
@@ -144,23 +145,20 @@ class _JsonBodyEditorState extends State<JsonBodyEditor> {
           child: Wrap(
             spacing: 2,
             children: [
-              IconButton(
+              TextButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'URL Decode',
                 onPressed: _urlDecodeJsonValues,
-                icon: const Icon(Icons.link_off),
+                child: Text(localizations.urlDecode),
               ),
-              IconButton(
+              TextButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'URL Encode',
                 onPressed: _urlEncodeJsonValues,
-                icon: const Icon(Icons.link),
+                child: Text(localizations.urlEncode),
               ),
-              IconButton(
+              TextButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'Format JSON',
                 onPressed: _formatJson,
-                icon: const Icon(Icons.data_object),
+                child: Text(localizations.jsonFormat),
               ),
             ],
           ),

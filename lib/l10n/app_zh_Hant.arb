@@ -363,5 +363,8 @@
 
   "local": "本地",
   "remoteUrl": "遠端URL",
+  "urlEncode": "Url編碼",
+  "urlDecode": "Url解碼",
+  "jsonFormat": "Json格式化",
   "view": "檢視"
 }
