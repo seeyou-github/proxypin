@@ -29,6 +29,7 @@ import 'package:proxypin/ui/component/json_body_editor.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/content/body.dart';
 import 'package:proxypin/utils/curl.dart';
+import 'package:proxypin/utils/json_url_codec.dart';
 import 'package:proxypin/utils/lang.dart';
 
 import 'package:proxypin/ui/mobile/request/request_editor_source.dart';
@@ -327,6 +328,7 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
   Map<String, List<String>> initHeader = {};
   HttpMessage? message;
   String? body;
+  Set<String> urlDecodedBodyPaths = {};
 
   AppLocalizations get localizations => AppLocalizations.of(context)!;
 
@@ -334,7 +336,15 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   String? getBody() {
-    return body;
+    if (body == null || urlDecodedBodyPaths.isEmpty) {
+      return body;
+    }
+
+    try {
+      return JsonUrlCodec.encodeStringValues(body!, urlDecodedBodyPaths);
+    } catch (_) {
+      return body;
+    }
   }
 
   @override
@@ -352,6 +362,7 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
   void change(HttpMessage? message) {
     this.message = message;
     body = message?.bodyAsString;
+    urlDecodedBodyPaths = {};
     headerKey.currentState?.refreshParam(message?.headers.getHeaders());
     setState(() {});
   }
@@ -401,6 +412,7 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
     return JsonBodyEditor(
       text: body,
       onChanged: (value) => body = value,
+      onUrlDecodedPathsChanged: (paths) => urlDecodedBodyPaths = paths,
       minLines: 3,
       maxLines: 15,
     );

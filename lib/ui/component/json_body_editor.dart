@@ -7,11 +7,13 @@ import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:flutter_toastr/flutter_toastr.dart';
 import 'package:highlight/languages/json.dart' as highlight_json;
 import 'package:proxypin/l10n/app_localizations.dart';
+import 'package:proxypin/utils/json_url_codec.dart';
 import 'package:proxypin/utils/platform.dart';
 
 class JsonBodyEditor extends StatefulWidget {
   final String? text;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<Set<String>>? onUrlDecodedPathsChanged;
   final int minLines;
   final int? maxLines;
   final bool autofocus;
@@ -20,6 +22,7 @@ class JsonBodyEditor extends StatefulWidget {
     super.key,
     this.text,
     this.onChanged,
+    this.onUrlDecodedPathsChanged,
     this.minLines = 3,
     this.maxLines,
     this.autofocus = false,
@@ -96,6 +99,28 @@ class _JsonBodyEditorState extends State<JsonBodyEditor> {
     }
   }
 
+  void _urlDecodeJsonValues() {
+    final localizations = AppLocalizations.of(context)!;
+    try {
+      final result = JsonUrlCodec.decodeStringValues(_codeController.text);
+      _codeController.text = result.text;
+      widget.onUrlDecodedPathsChanged?.call(result.paths);
+    } catch (_) {
+      FlutterToastr.show(localizations.decodeFail, context);
+    }
+  }
+
+  void _urlEncodeJsonValues() {
+    final localizations = AppLocalizations.of(context)!;
+    try {
+      final result = JsonUrlCodec.encodeAllStringValues(_codeController.text);
+      _codeController.text = result;
+      widget.onUrlDecodedPathsChanged?.call({});
+    } catch (_) {
+      FlutterToastr.show(localizations.encodeFail, context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_jsonMode) {
@@ -116,11 +141,28 @@ class _JsonBodyEditorState extends State<JsonBodyEditor> {
       children: [
         Align(
           alignment: Alignment.centerRight,
-          child: IconButton(
-            visualDensity: VisualDensity.compact,
-            tooltip: 'Format JSON',
-            onPressed: _formatJson,
-            icon: const Icon(Icons.data_object),
+          child: Wrap(
+            spacing: 2,
+            children: [
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: 'URL Decode',
+                onPressed: _urlDecodeJsonValues,
+                icon: const Icon(Icons.link_off),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: 'URL Encode',
+                onPressed: _urlEncodeJsonValues,
+                icon: const Icon(Icons.link),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: 'Format JSON',
+                onPressed: _formatJson,
+                icon: const Icon(Icons.data_object),
+              ),
+            ],
           ),
         ),
         SizedBox(

@@ -39,6 +39,7 @@ import 'package:proxypin/utils/crypto_body_decoder.dart';
 import 'package:proxypin/utils/css_formatter.dart';
 import 'package:proxypin/utils/html_formatter.dart';
 import 'package:proxypin/utils/js_formatter.dart';
+import 'package:proxypin/utils/json_url_codec.dart';
 import 'package:proxypin/utils/lang.dart';
 import 'package:proxypin/utils/num.dart';
 import 'package:proxypin/utils/platform.dart';
@@ -82,6 +83,7 @@ class HttpBodyState extends State<HttpBodyWidget> {
 
   AppLocalizations get localizations => AppLocalizations.of(context)!;
   bool showDecoded = false;
+  bool showUrlDecoded = false;
   CryptoDecodedResult? decoded;
 
   @override
@@ -99,6 +101,7 @@ class HttpBodyState extends State<HttpBodyWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.httpMessage?.requestId != widget.httpMessage?.requestId) {
       showDecoded = false;
+      showUrlDecoded = false;
       decoded = null;
       _loadDecoded();
     }
@@ -291,6 +294,28 @@ class HttpBodyState extends State<HttpBodyWidget> {
           }
         });
 
+    final urlDecodeBtn = IconButton(
+        visualDensity: visualDensity,
+        iconSize: 18,
+        icon: const Icon(Icons.link_off),
+        tooltip: 'URL Decode',
+        onPressed: () {
+          setState(() {
+            showUrlDecoded = true;
+          });
+        });
+
+    final urlEncodeBtn = IconButton(
+        visualDensity: visualDensity,
+        iconSize: 18,
+        icon: const Icon(Icons.link),
+        tooltip: 'URL Encode',
+        onPressed: () {
+          setState(() {
+            showUrlDecoded = false;
+          });
+        });
+
     final openNewBtn = IconButton(
         visualDensity: visualDensity,
         iconSize: 16,
@@ -321,6 +346,8 @@ class HttpBodyState extends State<HttpBodyWidget> {
         overflowItems.add(PopupMenuItem(value: 'rewrite', child: Text(localizations.requestRewrite)));
       }
       overflowItems.add(PopupMenuItem(value: 'encode', child: Text(localizations.encode)));
+      overflowItems.add(const PopupMenuItem(value: 'url_decode', child: Text('URL Decode')));
+      overflowItems.add(const PopupMenuItem(value: 'url_encode', child: Text('URL Encode')));
       if (!inNewWindow) {
         overflowItems.add(PopupMenuItem(value: 'new_window', child: Text(localizations.newWindow)));
       }
@@ -345,6 +372,16 @@ class HttpBodyState extends State<HttpBodyWidget> {
                     if (mounted) encodeWindow(EncoderType.base64, context, body);
                   });
                 }
+                if (v == 'url_decode') {
+                  setState(() {
+                    showUrlDecoded = true;
+                  });
+                }
+                if (v == 'url_encode') {
+                  setState(() {
+                    showUrlDecoded = false;
+                  });
+                }
                 if (v == 'new_window') openNew();
               },
               itemBuilder: (_) => overflowItems,
@@ -366,6 +403,8 @@ class HttpBodyState extends State<HttpBodyWidget> {
     if (!widget.hideRequestRewrite) {
       list.add(rewriteBtn);
     }
+    list.add(urlDecodeBtn);
+    list.add(urlEncodeBtn);
     list.add(encodeBtn);
     if (!inNewWindow) {
       list.add(openNewBtn);
@@ -556,6 +595,19 @@ class _BodyState extends State<_Body> {
     return body;
   }
 
+  String _urlDecodedBody(String body) {
+    final trimmed = body.trim();
+    try {
+      if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+        final result = JsonUrlCodec.decodeStringValues(body);
+        return result.changed ? result.text : body;
+      }
+      return Uri.decodeFull(body);
+    } catch (_) {
+      return body;
+    }
+  }
+
   Future<String?> getBody() async {
     final parent = context.findAncestorStateOfType<HttpBodyState>();
     final currentMessage = _effectiveMessage(parent);
@@ -575,12 +627,13 @@ class _BodyState extends State<_Body> {
     final body = parent?.showDecoded == true && parent?.decoded?.text != null
         ? parent!.decoded!.text!
         : await currentMessage.decodeBodyString();
+    final displayBody = parent?.showUrlDecoded == true ? _urlDecodedBody(body) : body;
 
     if (viewType == ViewType.text) {
-      return body;
+      return displayBody;
     }
 
-    return _formatTextBody(viewType, body);
+    return _formatTextBody(viewType, displayBody);
   }
 
   Widget _getBody(ViewType type) {
@@ -631,13 +684,15 @@ class _BodyState extends State<_Body> {
     }
 
     if (type == ViewType.formUrl) {
+      final body = parent?.showUrlDecoded == true ? _urlDecodedBody(message.getBodyString()) : message.getBodyString();
       return HighlightTextWidget(
-          text: _formatTextBody(type, message.getBodyString()),
+          text: _formatTextBody(type, body),
           searchController: widget.searchController,
           contextMenuBuilder: contextMenu);
     }
 
     return futureWidget(message.decodeBodyString(), initialData: message.getBodyString(), (body) {
+      body = parent?.showUrlDecoded == true ? _urlDecodedBody(body) : body;
       try {
         if (type == ViewType.jsonText) {
           var jsonObject = json.decode(body);

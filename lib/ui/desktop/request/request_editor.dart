@@ -33,6 +33,7 @@ import 'package:proxypin/ui/component/state_component.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/content/body.dart';
 import 'package:proxypin/utils/curl.dart';
+import 'package:proxypin/utils/json_url_codec.dart';
 import 'package:proxypin/utils/lang.dart';
 
 import '../../component/http_method_popup.dart';
@@ -377,11 +378,21 @@ class _HttpState extends State<_HttpWidget> {
   Map<String, List<String>> initHeader = {};
   HttpMessage? message;
   TextEditingController? body;
+  Set<String> urlDecodedBodyPaths = {};
 
   AppLocalizations get localizations => AppLocalizations.of(context)!;
 
   String? getBody() {
-    return body?.text;
+    final text = body?.text;
+    if (text == null || urlDecodedBodyPaths.isEmpty) {
+      return text;
+    }
+
+    try {
+      return JsonUrlCodec.encodeStringValues(text, urlDecodedBodyPaths);
+    } catch (_) {
+      return text;
+    }
   }
 
   HttpHeaders? getHeaders() {
@@ -407,6 +418,7 @@ class _HttpState extends State<_HttpWidget> {
   void change(HttpMessage? message) {
     this.message = message;
     body?.text = message?.bodyAsString ?? '';
+    urlDecodedBodyPaths = {};
     headerKey.currentState?.refreshParam(message?.headers.getHeaders());
   }
 
@@ -463,6 +475,7 @@ class _HttpState extends State<_HttpWidget> {
       minLines: 20,
       maxLines: 20,
       onChanged: (value) => body?.text = value,
+      onUrlDecodedPathsChanged: (paths) => urlDecodedBodyPaths = paths,
     );
   }
 }
