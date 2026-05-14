@@ -49,7 +49,7 @@ class JsonUrlCodec {
         final decoded = Uri.decodeComponent(value);
         if (decoded != value) {
           decodedPaths.add(path);
-          return decoded;
+          return _tryDecodeNestedJson(decoded);
         }
       } catch (_) {}
     }
@@ -57,6 +57,9 @@ class JsonUrlCodec {
   }
 
   static dynamic _walkEncode(dynamic value, String path, Set<String> paths) {
+    if (paths.contains(path)) {
+      return _encodeIfNeeded(value is String ? value : jsonEncode(value));
+    }
     if (value is Map) {
       return value.map((key, item) {
         final childPath = '$path/${_escapePath(key.toString())}';
@@ -65,9 +68,6 @@ class JsonUrlCodec {
     }
     if (value is List) {
       return [for (var index = 0; index < value.length; index++) _walkEncode(value[index], '$path/$index', paths)];
-    }
-    if (value is String && paths.contains(path)) {
-      return _encodeIfNeeded(value);
     }
     return value;
   }
@@ -96,6 +96,19 @@ class JsonUrlCodec {
 
   static bool _looksUrlEncoded(String value) {
     return RegExp(r'%[0-9a-fA-F]{2}').hasMatch(value);
+  }
+
+  static dynamic _tryDecodeNestedJson(String value) {
+    final trimmed = value.trim();
+    if (!(trimmed.startsWith('{') && trimmed.endsWith('}')) && !(trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      return value;
+    }
+
+    try {
+      return jsonDecode(value);
+    } catch (_) {
+      return value;
+    }
   }
 
   static String _escapePath(String value) => value.replaceAll('~', '~0').replaceAll('/', '~1');
