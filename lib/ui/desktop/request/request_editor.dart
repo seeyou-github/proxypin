@@ -27,6 +27,7 @@ import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/http_headers.dart';
 import 'package:proxypin/network/http/http_client.dart';
 import 'package:proxypin/network/util/logger.dart';
+import 'package:proxypin/ui/component/json_body_editor.dart';
 import 'package:proxypin/ui/component/split_view.dart';
 import 'package:proxypin/ui/component/state_component.dart';
 import 'package:proxypin/ui/configuration.dart';
@@ -456,7 +457,13 @@ class _HttpState extends State<_HttpWidget> {
           child: SingleChildScrollView(child: HttpBodyWidget(httpMessage: message, hideRequestRewrite: true)));
     }
 
-    return TextFormField(autofocus: true, controller: body, readOnly: widget.readOnly, minLines: 20, maxLines: 20);
+    return JsonBodyEditor(
+      autofocus: true,
+      text: body?.text,
+      minLines: 20,
+      maxLines: 20,
+      onChanged: (value) => body?.text = value,
+    );
   }
 }
 

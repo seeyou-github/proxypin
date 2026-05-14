@@ -25,6 +25,7 @@ import 'package:proxypin/network/channel/host_port.dart';
 import 'package:proxypin/network/http/http.dart';
 import 'package:proxypin/network/http/http_headers.dart';
 import 'package:proxypin/network/http/http_client.dart';
+import 'package:proxypin/ui/component/json_body_editor.dart';
 import 'package:proxypin/ui/configuration.dart';
 import 'package:proxypin/ui/content/body.dart';
 import 'package:proxypin/utils/curl.dart';
@@ -397,12 +398,12 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
       return SingleChildScrollView(child: HttpBodyWidget(httpMessage: message));
     }
 
-    return TextField(
-        controller: TextEditingController(text: body),
-        readOnly: widget.readOnly,
-        onChanged: (value) => body = value,
-        minLines: 3,
-        maxLines: 15);
+    return JsonBodyEditor(
+      text: body,
+      onChanged: (value) => body = value,
+      minLines: 3,
+      maxLines: 15,
+    );
   }
 }
 
