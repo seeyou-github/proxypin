@@ -6,11 +6,11 @@ on:
       applicationid:
         description: Android applicationId to build with
         required: false
-        default: com.network.proxy
+        default: com.learn.music
       application_name:
         description: Android app name to display on launcher
         required: false
-        default: ProxyPin
+        default: Pmusic
       version_name:
         description: Android version name to build with
         required: false
@@ -45,7 +45,7 @@ jobs:
         run: |
           app_id="${{ inputs.applicationid }}"
           if [ -z "$app_id" ]; then
-            app_id="com.network.proxy"
+            app_id="com.learn.music"
           fi
           if [[ ! "$app_id" =~ ^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$ ]]; then
             echo "Invalid Android applicationId: $app_id"
@@ -58,7 +58,7 @@ jobs:
         run: |
           app_name="${{ inputs.application_name }}"
           if [ -z "$app_name" ]; then
-            app_name="ProxyPin"
+            app_name="Pmusic"
           fi
           echo "application_name=$app_name" >> "$GITHUB_OUTPUT"
 
