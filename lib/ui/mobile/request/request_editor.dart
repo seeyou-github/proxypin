@@ -336,12 +336,12 @@ class _HttpState extends State<_HttpWidget> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   String? getBody() {
-    if (body == null || urlDecodedBodyPaths.isEmpty) {
-      return body;
-    }
+    if (body == null) return null;
 
     try {
-      return JsonUrlCodec.encodeStringValues(body!, urlDecodedBodyPaths);
+      final encoded =
+          urlDecodedBodyPaths.isEmpty ? body! : JsonUrlCodec.encodeStringValues(body!, urlDecodedBodyPaths);
+      return JsonUrlCodec.compact(encoded);
     } catch (_) {
       return body;
     }

@@ -384,12 +384,12 @@ class _HttpState extends State<_HttpWidget> {
 
   String? getBody() {
     final text = body?.text;
-    if (text == null || urlDecodedBodyPaths.isEmpty) {
-      return text;
-    }
+    if (text == null) return null;
 
     try {
-      return JsonUrlCodec.encodeStringValues(text, urlDecodedBodyPaths);
+      final encoded =
+          urlDecodedBodyPaths.isEmpty ? text : JsonUrlCodec.encodeStringValues(text, urlDecodedBodyPaths);
+      return JsonUrlCodec.compact(encoded);
     } catch (_) {
       return text;
     }

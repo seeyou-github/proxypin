@@ -11,6 +11,7 @@ class JsonUrlCodecResult {
 
 class JsonUrlCodec {
   static const JsonEncoder _prettyJson = JsonEncoder.withIndent('  ');
+  static const JsonEncoder _compactJson = JsonEncoder();
 
   static JsonUrlCodecResult decodeStringValues(String text) {
     final decodedPaths = <String>{};
@@ -30,6 +31,15 @@ class JsonUrlCodec {
     final object = jsonDecode(text);
     final encoded = _walkEncodeAll(object);
     return _prettyJson.convert(encoded);
+  }
+
+  static String compact(String text) {
+    final value = text.trim();
+    if (!_looksJsonContainer(value)) {
+      return text;
+    }
+
+    return _compactJson.convert(jsonDecode(value));
   }
 
   static dynamic _walkDecode(dynamic value, String path, Set<String> decodedPaths) {
@@ -100,7 +110,7 @@ class JsonUrlCodec {
 
   static dynamic _tryDecodeNestedJson(String value) {
     final trimmed = value.trim();
-    if (!(trimmed.startsWith('{') && trimmed.endsWith('}')) && !(trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    if (!_looksJsonContainer(trimmed)) {
       return value;
     }
 
@@ -112,4 +122,8 @@ class JsonUrlCodec {
   }
 
   static String _escapePath(String value) => value.replaceAll('~', '~0').replaceAll('/', '~1');
+
+  static bool _looksJsonContainer(String value) {
+    return (value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'));
+  }
 }
