@@ -79,16 +79,20 @@ class _FavoritesState extends State<Favorites> {
               return Center(child: Text(localizations.emptyFavorite));
             }
 
-            return ListView.separated(
-              itemCount: favorites.length + 1,
+            return ReorderableListView.builder(
+              buildDefaultDragHandles: false,
+              header: _FavoritesActions(onChanged: () => setState(() {})),
+              itemCount: favorites.length,
+              onReorder: (oldIndex, newIndex) async {
+                await FavoriteStorage.moveFavorite(oldIndex, newIndex);
+                if (mounted) setState(() {});
+              },
               itemBuilder: (_, index) {
-                if (index == 0) {
-                  return _FavoritesActions(onChanged: () => setState(() {}));
-                }
-                var request = favorites.elementAt(index - 1);
+                var request = favorites.elementAt(index);
                 return _FavoriteItem(
                   request,
-                  index: index - 1,
+                  key: ValueKey(request),
+                  index: index,
                   panel: widget.panel,
                   onRemove: (Favorite favorite) async {
                     await FavoriteStorage.removeFavorite(favorite);
@@ -97,8 +101,6 @@ class _FavoritesState extends State<Favorites> {
                   },
                 );
               },
-              separatorBuilder: (_, idx) =>
-                  idx == 0 ? const SizedBox(height: 4) : const Divider(height: 1, thickness: 0.3),
             );
           } else {
             return const SizedBox();
@@ -113,7 +115,7 @@ class _FavoriteItem extends StatefulWidget {
   final NetworkTabController panel;
   final Function(Favorite favorite)? onRemove;
 
-  const _FavoriteItem(this.favorite, {required this.panel, required this.onRemove, required this.index});
+  const _FavoriteItem(this.favorite, {super.key, required this.panel, required this.onRemove, required this.index});
 
   @override
   State<_FavoriteItem> createState() => _FavoriteItemState();
@@ -134,35 +136,51 @@ class _FavoriteItemState extends State<_FavoriteItem> {
     var response = widget.favorite.response;
     var title = '${request.method.name} ${request.requestUrl}'.fixAutoLines();
     var time = formatDate(request.requestTime, [mm, '-', d, ' ', HH, ':', nn, ':', ss]);
+    final hasName = widget.favorite.name?.isNotEmpty == true;
 
     return GestureDetector(
         onSecondaryLongPressDown: (details) => menu(details, request),
         child: ListTile(
             minLeadingWidth: 25,
             leading: getIcon(response),
-            title: Text(widget.favorite.name ?? title, overflow: TextOverflow.ellipsis, maxLines: 2),
-            trailing: request.isWebSocket
-                ? Text(
-                    'WS',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  )
-                : null,
+            title: Text(widget.favorite.name ?? title, overflow: TextOverflow.ellipsis, maxLines: hasName ? 1 : 2),
+            trailing: _trailing(request),
             subtitle: Text.rich(
                 style: const TextStyle(fontSize: 12),
                 maxLines: 1,
-                TextSpan(children: [
-                  TextSpan(text: '#${widget.index} ', style: const TextStyle(color: Colors.teal)),
-                  TextSpan(
-                      text:
-                          '$time - [${response?.status.code ?? ''}]  ${response?.contentType.name.toUpperCase() ?? ''} ${response?.costTime() ?? ''} '),
-                ])),
+                hasName
+                    ? TextSpan(text: request.requestUrl)
+                    : TextSpan(children: [
+                        TextSpan(text: '#${widget.index} ', style: const TextStyle(color: Colors.teal)),
+                        TextSpan(
+                            text:
+                                '$time - [${response?.status.code ?? ''}]  ${response?.contentType.name.toUpperCase() ?? ''} ${response?.costTime() ?? ''} '),
+                      ])),
             selected: selected,
             dense: true,
             onTap: () => onClick(request)));
+  }
+
+  Widget _trailing(HttpRequest request) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (request.isWebSocket)
+          Text(
+            'WS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        const SizedBox(width: 8),
+        ReorderableDragStartListener(
+          index: widget.index,
+          child: Icon(Icons.drag_handle, size: 18, color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
+        ),
+      ],
+    );
   }
 
   ///右键菜单

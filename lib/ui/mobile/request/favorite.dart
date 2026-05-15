@@ -121,12 +121,18 @@ class _FavoritesState extends State<MobileFavorites> {
                   return Center(child: Text(localizations.emptyFavorite));
                 }
 
-                return ListView.separated(
+                return ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   itemCount: favorites.length,
+                  onReorder: (oldIndex, newIndex) async {
+                    await FavoriteStorage.moveFavorite(oldIndex, newIndex);
+                    if (mounted) setState(() {});
+                  },
                   itemBuilder: (_, index) {
                     var favorite = favorites.elementAt(index);
                     return _FavoriteItem(
                       favorite,
+                      key: ValueKey(favorite),
                       index: index,
                       onRemove: (Favorite favorite) async {
                         await FavoriteStorage.removeFavorite(favorite);
@@ -135,7 +141,6 @@ class _FavoritesState extends State<MobileFavorites> {
                       proxyServer: widget.proxyServer,
                     );
                   },
-                  separatorBuilder: (_, __) => const Divider(height: 1, thickness: 0.3),
                 );
               } else {
                 return const SizedBox();
@@ -150,7 +155,7 @@ class _FavoriteItem extends StatefulWidget {
   final ProxyServer proxyServer;
   final Function(Favorite favorite)? onRemove;
 
-  const _FavoriteItem(this.favorite, {required this.onRemove, required this.proxyServer, required this.index});
+  const _FavoriteItem(this.favorite, {super.key, required this.onRemove, required this.proxyServer, required this.index});
 
   @override
   State<_FavoriteItem> createState() => _FavoriteItemState();
@@ -173,7 +178,8 @@ class _FavoriteItemState extends State<_FavoriteItem> {
     request = widget.favorite.request;
 
     var response = request.response;
-    Widget? title = widget.favorite.name?.isNotEmpty == true
+    final hasName = widget.favorite.name?.isNotEmpty == true;
+    Widget? title = hasName
         ? Text(widget.favorite.name!,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -208,24 +214,39 @@ class _FavoriteItemState extends State<_FavoriteItem> {
             minLeadingWidth: 25,
             leading: getIcon(response),
             title: title,
-            trailing: request.isWebSocket
-                ? Text(
-                    'WS',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  )
-                : null,
+            trailing: _trailing(request),
             subtitle: Text.rich(
                 maxLines: 1,
-                TextSpan(children: [
-                  TextSpan(text: '#${widget.index} ', style: const TextStyle(fontSize: 12, color: Colors.teal)),
-                  TextSpan(text: subtitle, style: const TextStyle(fontSize: 12)),
-                ])),
+                hasName
+                    ? TextSpan(text: request.requestUrl, style: const TextStyle(fontSize: 12))
+                    : TextSpan(children: [
+                        TextSpan(text: '#${widget.index} ', style: const TextStyle(fontSize: 12, color: Colors.teal)),
+                        TextSpan(text: subtitle, style: const TextStyle(fontSize: 12)),
+                      ])),
             dense: true,
             onTap: onClick));
+  }
+
+  Widget _trailing(HttpRequest request) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (request.isWebSocket)
+          Text(
+            'WS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        const SizedBox(width: 8),
+        ReorderableDragStartListener(
+          index: widget.index,
+          child: Icon(Icons.drag_handle, size: 18, color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
+        ),
+      ],
+    );
   }
 
   ///右键菜单

@@ -86,6 +86,30 @@ class FavoriteStorage {
     await flushConfig();
   }
 
+  static Future<void> moveFavorite(int oldIndex, int newIndex) async {
+    final current = await favorites;
+    if (oldIndex < 0 || oldIndex >= current.length) {
+      return;
+    }
+    final items = current.toList(growable: true);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = items.removeAt(oldIndex);
+    var targetIndex = newIndex;
+    if (targetIndex < 0) {
+      targetIndex = 0;
+    } else if (targetIndex > items.length) {
+      targetIndex = items.length;
+    }
+    items.insert(targetIndex, item);
+    current
+      ..clear()
+      ..addAll(items);
+    await flushConfig();
+    addNotifier?.call();
+  }
+
   //刷新配置
   static Future<void> flushConfig() async {
     var list = await favorites;
