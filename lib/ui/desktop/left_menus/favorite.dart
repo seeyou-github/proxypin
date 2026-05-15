@@ -147,9 +147,9 @@ class _FavoriteItemState extends State<_FavoriteItem> {
             trailing: _trailing(request),
             subtitle: Text.rich(
                 style: const TextStyle(fontSize: 12),
-                maxLines: 1,
+                maxLines: hasName ? null : 1,
                 hasName
-                    ? TextSpan(text: request.requestUrl)
+                    ? TextSpan(text: request.requestUrl.fixAutoLines())
                     : TextSpan(children: [
                         TextSpan(text: '#${widget.index} ', style: const TextStyle(color: Colors.teal)),
                         TextSpan(
